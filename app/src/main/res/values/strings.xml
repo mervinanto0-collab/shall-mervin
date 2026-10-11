@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">CarePulse</string>
+    <string name="health_monitor_title">Health Monitor</string>
+    <string name="symptom_analyzer_title">Symptom Analysis</string>
+    <string name="teleconsult_title">Remote Consult</string>
+    <string name="medications_title">Care Plan</string>
+    <string name="emergency_sos">Emergency SOS</string>
+</resources>

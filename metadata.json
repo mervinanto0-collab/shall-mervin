@@ -1,0 +1,6 @@
+{
+  "name": "CarePulse",
+  "description": "Smart patient tablet & remote health monitor with live vitals telemetry, real-time symptom analysis, and instant doctor consultations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

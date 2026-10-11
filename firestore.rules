@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidVitalsRecord(data) {
+      return data.userId is string &&
+             data.heartRate is int && data.heartRate > 30 && data.heartRate < 250 &&
+             data.spo2 is int && data.spo2 >= 50 && data.spo2 <= 100 &&
+             data.systolicBp is int && data.systolicBp > 50 && data.systolicBp < 260 &&
+             data.diastolicBp is int && data.diastolicBp > 30 && data.diastolicBp < 180 &&
+             (data.temperatureF is number || data.temperatureF is float) &&
+             data.respirationRate is int &&
+             data.status is string &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidSymptomReport(data) {
+      return data.userId is string &&
+             data.bodyRegion is string &&
+             data.primarySymptom is string &&
+             data.severity is int && data.severity >= 1 && data.severity <= 10 &&
+             data.durationHours is int &&
+             data.triageLevel is string &&
+             data.recommendation is string &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidDoctorConsultation(data) {
+      return data.userId is string &&
+             data.doctorName is string &&
+             data.doctorSpecialty is string &&
+             data.chiefComplaint is string &&
+             data.clinicalSummary is string &&
+             data.prescriptionSummary is string &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidMedicationItem(data) {
+      return data.userId is string &&
+             data.name is string && data.name.size() > 0 &&
+             data.dosage is string &&
+             data.timing is string &&
+             data.isTaken is bool &&
+             data.instructions is string &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidChatMessage(data) {
+      return data.userId is string &&
+             data.sender is string &&
+             data.message is string && data.message.size() > 0 &&
+             data.isFromUser is bool &&
+             data.modelUsed is string &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /vitals/{vitalId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId && isValidVitalsRecord(request.resource.data);
+        allow update: if isOwner(userId) && request.resource.data.userId == userId && isValidVitalsRecord(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /symptoms/{symptomId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId && isValidSymptomReport(request.resource.data);
+        allow update: if isOwner(userId) && request.resource.data.userId == userId && isValidSymptomReport(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /consultations/{consultationId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId && isValidDoctorConsultation(request.resource.data);
+        allow update: if isOwner(userId) && request.resource.data.userId == userId && isValidDoctorConsultation(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /medications/{medicationId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId && isValidMedicationItem(request.resource.data);
+        allow update: if isOwner(userId) && request.resource.data.userId == userId && isValidMedicationItem(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /chat_messages/{messageId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId && isValidChatMessage(request.resource.data);
+        allow update: if isOwner(userId) && request.resource.data.userId == userId && isValidChatMessage(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

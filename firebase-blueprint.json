@@ -1,0 +1,110 @@
+{
+  "entities": {
+    "VitalsRecord": {
+      "title": "VitalsRecord",
+      "description": "Patient physiological vital signs telemetry recording",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the owning patient user" },
+        "heartRate": { "type": "integer", "description": "Heart rate in beats per minute (BPM)" },
+        "spo2": { "type": "integer", "description": "Blood oxygen saturation percentage" },
+        "systolicBp": { "type": "integer", "description": "Systolic blood pressure in mmHg" },
+        "diastolicBp": { "type": "integer", "description": "Diastolic blood pressure in mmHg" },
+        "temperatureF": { "type": "number", "description": "Body temperature in Fahrenheit" },
+        "respirationRate": { "type": "integer", "description": "Breaths per minute" },
+        "status": { "type": "string", "description": "Clinical status flag (Normal, Alert, Warning)" },
+        "notes": { "type": "string", "description": "Reading source and notes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp via serverTimestamp" }
+      },
+      "required": ["userId", "heartRate", "spo2", "systolicBp", "diastolicBp", "temperatureF", "respirationRate", "status", "createdAt"]
+    },
+    "SymptomReport": {
+      "title": "SymptomReport",
+      "description": "Patient reported symptom and real-time clinical triage record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the owning patient user" },
+        "bodyRegion": { "type": "string", "description": "Affected anatomical body region" },
+        "primarySymptom": { "type": "string", "description": "Chief symptom reported" },
+        "severity": { "type": "integer", "description": "Pain or distress severity rating 1 to 10" },
+        "durationHours": { "type": "integer", "description": "Symptom duration in hours" },
+        "triageLevel": { "type": "string", "description": "Computed triage level: EMERGENCY, URGENT, TELECONSULT, SELF_CARE" },
+        "recommendation": { "type": "string", "description": "Clinical action recommendation" },
+        "differentialAnalysis": { "type": "string", "description": "Differential considerations" },
+        "vitalsSnapshot": { "type": "string", "description": "Telemetry snapshot at time of report" },
+        "notes": { "type": "string", "description": "Patient notes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp via serverTimestamp" }
+      },
+      "required": ["userId", "bodyRegion", "primarySymptom", "severity", "durationHours", "triageLevel", "recommendation", "createdAt"]
+    },
+    "DoctorConsultation": {
+      "title": "DoctorConsultation",
+      "description": "Telemedicine consultation record and digital prescription summary",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the owning patient user" },
+        "doctorName": { "type": "string", "description": "Consulting physician name" },
+        "doctorSpecialty": { "type": "string", "description": "Physician clinical specialty" },
+        "chiefComplaint": { "type": "string", "description": "Chief complaint evaluated" },
+        "clinicalSummary": { "type": "string", "description": "Physician clinical notes" },
+        "prescriptionSummary": { "type": "string", "description": "Prescription and dosage guidance" },
+        "followUpAdvice": { "type": "string", "description": "Follow up instructions" },
+        "callDurationMinutes": { "type": "integer", "description": "Consultation call length in minutes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp via serverTimestamp" }
+      },
+      "required": ["userId", "doctorName", "doctorSpecialty", "chiefComplaint", "clinicalSummary", "prescriptionSummary", "createdAt"]
+    },
+    "MedicationItem": {
+      "title": "MedicationItem",
+      "description": "Prescribed medication regimen item",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the owning patient user" },
+        "name": { "type": "string", "description": "Medication commercial or generic name" },
+        "dosage": { "type": "string", "description": "Prescribed strength and form" },
+        "timing": { "type": "string", "description": "Dosing schedule" },
+        "isTaken": { "type": "boolean", "description": "Daily adherence check-off flag" },
+        "instructions": { "type": "string", "description": "Administration instructions" },
+        "prescribedBy": { "type": "string", "description": "Prescribing doctor" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last adherence update timestamp" }
+      },
+      "required": ["userId", "name", "dosage", "timing", "isTaken", "instructions", "updatedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Multi-turn Gemini AI conversation history message",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the owning patient user" },
+        "sender": { "type": "string", "description": "Sender identifier (Patient or AI Doctor)" },
+        "message": { "type": "string", "description": "Message content" },
+        "isFromUser": { "type": "boolean", "description": "True if patient, false if model" },
+        "modelUsed": { "type": "string", "description": "Gemini model version used" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Message creation timestamp" }
+      },
+      "required": ["userId", "sender", "message", "isFromUser", "modelUsed", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/vitals/{vitalId}": {
+      "schema": { "$ref": "#/entities/VitalsRecord" },
+      "description": "User vital sign recordings"
+    },
+    "/users/{userId}/symptoms/{symptomId}": {
+      "schema": { "$ref": "#/entities/SymptomReport" },
+      "description": "User symptom assessments"
+    },
+    "/users/{userId}/consultations/{consultationId}": {
+      "schema": { "$ref": "#/entities/DoctorConsultation" },
+      "description": "User teleconsultation summaries"
+    },
+    "/users/{userId}/medications/{medicationId}": {
+      "schema": { "$ref": "#/entities/MedicationItem" },
+      "description": "User medication regimen"
+    },
+    "/users/{userId}/chat_messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Multi-turn Gemini clinical chat thread"
+    }
+  }
+}
